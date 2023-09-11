@@ -11,14 +11,13 @@ async fn health_check_should_return_ok() {
         .send()
         .await
         .expect("Failed to execute request.");
-        
+
     assert_eq!(response.status(), StatusCode::OK);
     assert_eq!(Some(0), response.content_length());
 }
 
 fn spawn_app() -> String {
-    let listener = TcpListener::bind("127.0.0.1:0")
-        .expect("Failed to bind random port");
+    let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
     let port = listener.local_addr().unwrap().port();
     let server = zero2prod::run(listener).expect("Failed to bind address");
     let _ = tokio::spawn(server);

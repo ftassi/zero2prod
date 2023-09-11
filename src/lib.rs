@@ -1,5 +1,5 @@
-use std::net::TcpListener;
 use actix_web::{dev::Server, get, App, HttpResponse, HttpServer, Responder};
+use std::net::TcpListener;
 
 #[get("/health_check")]
 async fn health_check() -> impl Responder {
