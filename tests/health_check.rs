@@ -22,7 +22,7 @@ async fn health_check_should_return_ok() {
 #[tokio::test]
 async fn subscribe_returns_a_200_for_valid_form_data() {
     let app_data = spawn_app().await;
-    let configuration = get_configuration().expect("Failed to read configuration.");
+    let _configuration = get_configuration().expect("Failed to read configuration.");
 
     let client = reqwest::Client::new();
     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
