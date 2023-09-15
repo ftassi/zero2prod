@@ -3,7 +3,7 @@ use std::net::TcpListener;
 use uuid::Uuid;
 use zero2prod::configuration::{get_configuration, DatabaseSettings};
 
-use reqwest::StatusCode;
+
 
 #[tokio::test]
 async fn subscribe_returns_a_200_for_valid_form_data() {
@@ -65,7 +65,7 @@ async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .expect("Failed to connect to Postgres.");
 
     connection
-        .execute(&*format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
+        .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
         .await
         .expect("Failed to create database.");
 
