@@ -14,8 +14,26 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Run tests
-        run: cargo test
-
+        run: |
+          ./scripts/wait-for-it.sh -s ${POSTGRES_HOST}:${POSTGRES_PORT} -- sqlx database create
+          ./scripts/wait-for-it.sh -s ${POSTGRES_HOST}:${POSTGRES_PORT} -- sqlx migrate run
+          ./scripts/wait-for-it.sh -s ${POSTGRES_HOST}:${POSTGRES_PORT} -- cargo test
+    services:
+      db:
+        image: postgres:15.4
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_HOST: localhost
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
