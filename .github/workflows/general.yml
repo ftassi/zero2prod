@@ -15,6 +15,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Run tests
         run: |
+          sqlx database create
+          sqlx migrate run
           cargo test
     services:
       db:
