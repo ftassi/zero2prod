@@ -3,8 +3,6 @@ use std::net::TcpListener;
 use uuid::Uuid;
 use zero2prod::configuration::{get_configuration, DatabaseSettings};
 
-
-
 #[tokio::test]
 async fn subscribe_returns_a_200_for_valid_form_data() {
     let app_data = spawn_app().await;
