@@ -15,9 +15,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Run tests
         run: |
-          ./scripts/wait-for-it.sh -s ${POSTGRES_HOST}:${POSTGRES_PORT} -- sqlx database create
-          ./scripts/wait-for-it.sh -s ${POSTGRES_HOST}:${POSTGRES_PORT} -- sqlx migrate run
-          ./scripts/wait-for-it.sh -s ${POSTGRES_HOST}:${POSTGRES_PORT} -- cargo test
+          sqlx database create
+          sqlx migrate run
+          cargo test
     services:
       db:
         image: postgres:15.4
