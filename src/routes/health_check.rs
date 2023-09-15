@@ -1,6 +1,7 @@
-use actix_web::{get, HttpResponse, Responder};
+#![allow(hidden_glob_reexports)]
 
-#[get("/health_check")]
+use actix_web::{HttpResponse, Responder};
+
 pub async fn health_check() -> impl Responder {
     HttpResponse::Ok()
 }

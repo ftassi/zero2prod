@@ -1,4 +1,6 @@
-use actix_web::{post, web, HttpResponse, Responder};
+#![allow(hidden_glob_reexports)]
+
+use actix_web::{web, HttpResponse, Responder};
 use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -9,7 +11,6 @@ pub struct FormData {
     name: String,
 }
 
-#[post("/subscriptions")]
 pub async fn subscriptions(
     form: web::Form<FormData>,
     connection: web::Data<PgPool>,
