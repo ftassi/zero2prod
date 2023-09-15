@@ -4,6 +4,8 @@ on: [push, pull_request]
 
 env:
   CARGO_TERM_COLOR: always
+  SQLX_VERSION: 0.7.1
+  SQLX_FEATURES: "rustls,postgres"
 
 jobs:
   test:
@@ -12,12 +14,24 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Run tests
+      - name: Rust Cache Action
+        uses: Swatinem/rust-cache@v2
+        with:
+          # An additional cache key that is added alongside the automatic `job`-based cache key and can be used to further differentiate jobs. default: empty
+          key: sqlx-${{ env.SQLX_VERSION }}
+      - name: Install sqlx-cli
+        run:
+          cargo install sqlx-cli
+          --version=${{ env.SQLX_VERSION }}
+          --features ${{ env.SQLX_FEATURES }}
+          --no-default-features
+          --locked
+      - name: Migrate database
         run: |
-          cargo install sqlx-cli --no-default-features --features rustls,postgres
           sqlx database create
           sqlx migrate run
+      - name: Run tests
+        run: |
           cargo test
     services:
       db:
@@ -28,8 +42,6 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
-          POSTGRES_PORT: 5432
-          POSTGRES_HOST: localhost
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -45,26 +57,7 @@ jobs:
           components: rustfmt
       - name: Enforce formatting
         run: |
-          cargo install sqlx-cli --no-default-features --features rustls,postgres
-          sqlx database create
-          sqlx migrate run
           cargo fmt --check
-    services:
-      db:
-        image: postgres:15.4
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
-          POSTGRES_PORT: 5432
-          POSTGRES_HOST: localhost
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
   clippy:
     name: Clippy
@@ -74,12 +67,24 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
-      - uses: Swatinem/rust-cache@v2
-      - name: Linting
+      - name: Rust Cache Action
+        uses: Swatinem/rust-cache@v2
+        with:
+          # An additional cache key that is added alongside the automatic `job`-based cache key and can be used to further differentiate jobs. default: empty
+          key: sqlx-${{ env.SQLX_VERSION }}
+      - name: Install sqlx-cli
+        run:
+          cargo install sqlx-cli
+          --version=${{ env.SQLX_VERSION }}
+          --features ${{ env.SQLX_FEATURES }}
+          --no-default-features
+          --locked
+      - name: Migrate database
         run: |
-          cargo install sqlx-cli --no-default-features --features rustls,postgres
           sqlx database create
           sqlx migrate run
+      - name: Linting
+        run: |
           cargo clippy -- -D warnings
     services:
       db:
@@ -90,8 +95,6 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
-          POSTGRES_PORT: 5432
-          POSTGRES_HOST: localhost
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -107,12 +110,26 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Generate code coverage
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Rust Cache Action
+        uses: Swatinem/rust-cache@v2
+        with:
+          # An additional cache key that is added alongside the automatic `job`-based cache key and can be used to further differentiate jobs. default: empty
+          key: sqlx-${{ env.SQLX_VERSION }}
+      - name: Install sqlx-cli
+        run:
+          cargo install sqlx-cli
+          --version=${{ env.SQLX_VERSION }}
+          --features ${{ env.SQLX_FEATURES }}
+          --no-default-features
+          --locked
+      - name: Migrate database
         run: |
-          cargo install sqlx-cli --no-default-features --features rustls,postgres
           sqlx database create
           sqlx migrate run
-          cargo tarpaulin --verbose --workspace
+      - name: Generate code coverage
+        run: |
+          cargo install cargo-tarpaulin && cargo tarpaulin --verbose --workspace
     services:
       db:
         image: postgres:15.4
@@ -122,8 +139,6 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
-          POSTGRES_PORT: 5432
-          POSTGRES_HOST: localhost
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
