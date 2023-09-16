@@ -93,7 +93,7 @@ async fn spawn_app() -> AppData {
     let port = listener.local_addr().unwrap().port();
     let server =
         zero2prod::startup::run(listener, connection.clone()).expect("Failed to bind address");
-    let _ = tokio::spawn(server);
+    tokio::spawn(server);
 
     AppData {
         address: format!("http://127.0.0.1:{}", port),
