@@ -1,9 +1,26 @@
+use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use uuid::Uuid;
-use zero2prod::configuration::{get_configuration, DatabaseSettings};
+use zero2prod::{
+    configuration::{get_configuration, DatabaseSettings},
+    telemetry::{get_subcriber, init_subscriber},
+};
 
 use reqwest::StatusCode;
+
+static TRACING: Lazy<()> = Lazy::new(|| {
+    match std::env::var("TEST_LOG") {
+        Ok(..) => {
+            let subscriber = get_subcriber("test".into(), "debug".into(), std::io::stdout);
+            init_subscriber(subscriber);
+        }
+        Err(..) => {
+            let subscriber = get_subcriber("test".into(), "debug".into(), std::io::sink);
+            init_subscriber(subscriber);
+        }
+    };
+});
 
 struct AppData {
     address: String,
@@ -101,6 +118,7 @@ async fn configure_database(config: &DatabaseSettings) -> PgPool {
 }
 
 async fn spawn_app() -> AppData {
+    Lazy::force(&TRACING);
     let mut configuration = get_configuration().expect("Failed to read configuration.");
     configuration.database.database_name = Uuid::new_v4().to_string();
 
