@@ -5,6 +5,11 @@ use zero2prod::configuration::{get_configuration, DatabaseSettings};
 
 use reqwest::StatusCode;
 
+struct AppData {
+    address: String,
+    connection: PgPool,
+}
+
 #[tokio::test]
 async fn health_check_should_return_ok() {
     let app_data = spawn_app().await;
@@ -93,11 +98,6 @@ async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .expect("Failed to migrate database.");
 
     connection_pool
-}
-
-struct AppData {
-    address: String,
-    connection: PgPool,
 }
 
 async fn spawn_app() -> AppData {
