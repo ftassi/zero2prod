@@ -23,5 +23,10 @@ DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:$
 export DATABASE_URL
 
 docker compose up -d
-./scripts/wait-for-it.sh -s ${POSTGRES_HOST}:${POSTGRES_PORT} -- sqlx database create
-./scripts/wait-for-it.sh -s ${POSTGRES_HOST}:${POSTGRES_PORT} -- sqlx migrate run
+
+echo 'Waiting for the database to be ready...'
+timeout 30s bash -c 'until docker exec zero2prod-db-1 pg_isready 2>/dev/null;do sleep 1; done'
+
+echo 'Migrating the database...'
+sqlx database create
+sqlx migrate run
