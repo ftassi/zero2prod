@@ -62,6 +62,8 @@ jobs:
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
+    env:
+      SQLX_OFFLINE: true
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@stable
@@ -72,31 +74,6 @@ jobs:
         with:
           # An additional cache key that is added alongside the automatic `job`-based cache key and can be used to further differentiate jobs. default: empty
           key: sqlx-${{ env.SQLX_VERSION }}
-      - name: Install sqlx-cli
-        run:
-          cargo install sqlx-cli
-          --version=${{ env.SQLX_VERSION }}
-          --features ${{ env.SQLX_FEATURES }}
-          --no-default-features
-          --locked
-      - name: Migrate database
-        run: |
-          sqlx database create
-          sqlx migrate run
       - name: Linting
         run: |
           cargo clippy -- -D warnings
-    services:
-      db:
-        image: postgres:15.4
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
