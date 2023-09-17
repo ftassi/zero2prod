@@ -17,7 +17,9 @@ async fn main() -> Result<(), std::io::Error> {
             .await
             .expect("Failed to connect to Postgres.");
 
-    let listener =
-        std::net::TcpListener::bind(format!("127.0.0.1:{}", configuration.application_port))?;
+    let listener = std::net::TcpListener::bind(format!(
+        "{}:{}",
+        configuration.application.host, configuration.application.port
+    ))?;
     run(listener, connection_pool)?.await
 }
