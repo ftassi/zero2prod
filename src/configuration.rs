@@ -1,6 +1,6 @@
 use secrecy::{ExposeSecret, Secret};
 use serde_aux::field_attributes::deserialize_number_from_string;
-use sqlx::postgres::PgConnectOptions;
+use sqlx::{postgres::PgConnectOptions, ConnectOptions};
 
 pub enum Environment {
     Local,
@@ -57,7 +57,9 @@ pub struct ApplicationSettings {
 
 impl DatabaseSettings {
     pub fn with_db(&self) -> PgConnectOptions {
-        self.without_db().database(&self.database_name)
+        self.without_db()
+            .database(&self.database_name)
+            .log_statements(tracing::log::LevelFilter::Trace)
     }
 
     pub fn without_db(&self) -> PgConnectOptions {
