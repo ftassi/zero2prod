@@ -45,6 +45,7 @@ pub struct DatabaseSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub database_name: String,
+    pub require_ssl: bool,
 }
 
 #[derive(serde::Deserialize)]
@@ -65,6 +66,10 @@ impl DatabaseSettings {
             .port(self.port)
             .username(&self.username)
             .password(self.password.expose_secret())
+            .ssl_mode(match self.require_ssl {
+                true => sqlx::postgres::PgSslMode::Require,
+                false => sqlx::postgres::PgSslMode::Prefer,
+            })
     }
 }
 
